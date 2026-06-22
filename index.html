@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jurnal Harian Guru - SMAN 15 Maluku Tengah</title>
+  <link href="https://googleapis.com" rel="stylesheet">
+  <link rel="stylesheet" href="https://cloudflare.com">
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --secondary-color: #06b6d4;
+      --background-color: #f8fafc;
+      --card-background: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --readonly-bg: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: var(--background-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 20px 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: var(--card-background);
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      padding: 30px;
+      transition: all 0.3s ease;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group label i {
+      margin-right: 6px;
+      color: var(--primary-color);
+    }
+
+    select, input, textarea {
+      width: 100%;
+      display: block;
+      padding: 12px 16px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    select:disabled {
+      background-color: #f1f5f9;
+      cursor: not-allowed;
+      color: var(--text-muted);
+    }
+
+    .readonly-input {
+      background-color: var(--readonly-bg) !important;
+      color: #475569;
+      cursor: not-allowed;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .grid-absensi {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .grid-absensi input {
+      text-align: center;
+    }
+
+    /* Bagian Interaktif */
+    .interactive-section {
+      background: linear-gradient(145deg, #f1f5f9, #f8fafc);
+      border: 1px dashed var(--primary-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    .interactive-section h3 {
+      font-size: 15px;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .btn-trigger {
+      background-color: var(--secondary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 6px -1px rgba(6, 182, 212, 0.2);
+    }
+
+    @media (hover: hover) {
+      .btn-trigger:hover { background-color: #0891b2; }
+      .btn-submit:hover { background-color: var(--primary-hover); }
+    }
+
+    /* Kotak Preview */
+    .preview-box {
+      display: none;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    .preview-box h4 {
+      color: #166534;
+      margin-bottom: 5px;
+    }
+
+    .preview-box div {
+      margin-bottom: 4px;
+    }
+
+    /* Tombol Submit */
+    .btn-submit {
+      width: 100%;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-submit:disabled {
+      background-color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Gaya Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      width: 90%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: 25px;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.active .modal-content {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .btn-close-modal {
+      background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer;
+    }
+
+    .modal-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-save-modal {
+      background-color: var(--primary-color);
+      color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer;
+    }
+
+    .toast {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #334155; color: #fff;
+      padding: 12px 24px; border-radius: 8px; font-size: 14px; display: none; z-index: 1001;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15); text-align: center; width: auto; max-width: 90%;
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 15px; }
+      .row { grid-template-columns: 1fr; gap: 10px; }
+      header h1 { font-size: 20px; }
+      .grid-absensi { gap: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Jurnal Harian Pembelajaran</h1>
+      <p>SMA Negeri 15 Maluku Tengah</p>
+    </header>
+
+        <form id="jurnalForm">
+      <div class="form-group">
+        <label for="namaGuru"><i class="fa-solid fa-user-tie"></i> Nama Guru</label>
+        <select id="namaGuru" required>
+          <option value="" disabled selected>Memuat nama guru...</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="mataPelajaran"><i class="fa-solid fa-book"></i> Mata Pelajaran</label>
+          <select id="mataPelajaran" required disabled>
+            <option value="" disabled selected>-- Pilih Guru Dahulu --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="kelas"><i class="fa-solid fa-school"></i> Kelas</label>
+          <select id="kelas" required disabled>
+            <option value="" disabled selected>-- Pilih Guru Dahulu --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="interactive-section">
+        <h3>Detail Pembelajaran Harian</h3>
+        <button type="button" class="btn-trigger" id="btnOpenPopup">
+          <i class="fa-solid fa-file-pen"></i> Isi Detail Pertemuan
+        </button>
+        
+        <div class="preview-box" id="previewBox">
+          <h4><i class="fa-solid fa-circle-check"></i> Detail Pertemuan Tersimpan:</h4>
+          <div><strong>Pertemuan Ke:</strong> <span id="p_pertemuan">-</span></div>
+          <div><strong>Materi Pokok:</strong> <span id="p_materi">-</span></div>
+          <div><strong>Tujuan:</strong> <span id="p_tujuan">-</span></div>
+          <div><strong>Metode:</strong> <span id="p_metode">-</span></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label><i class="fa-solid fa-users-check"></i> Rekap Kehadiran Siswa</label>
+        <div class="grid-absensi">
+          <div>
+            <span style="font-size:11px; display:block; text-align:center;">Hadir</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="absHadir" value="0" required>
+          </div>
+          <div>
+            <span style="font-size:11px; display:block; text-align:center;">Sakit</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="absSakit" value="0" required>
+          </div>
+          <div>
+            <span style="font-size:11px; display:block; text-align:center;">Izin</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="absIzin" value="0" required>
+          </div>
+          <div>
+            <span style="font-size:11px; display:block; text-align:center;">Alfa</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" id="absAlfa" value="0" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="catatanRefleksi"><i class="fa-solid fa-note-sticky"></i> Catatan Refleksi / Kendala Kelas</label>
+        <textarea id="catatanRefleksi" placeholder="Contoh: Pembelajaran kondusif, beberapa siswa butuh bimbingan ekstra pada latihan soal." required></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span id="btnText"><i class="fa-solid fa-paper-plane"></i> Kirim Jurnal Harian</span>
+      </button>
+    </form>
+
+        <!-- TABEL RIWAYAT JURNAL UNTUK DIUNDUH -->
+    <div class="interactive-section" style="margin-top: 30px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <h3 style="margin-bottom: 0;"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Jurnal (Status: Selesai)</h3>
+        <button type="button" class="btn-trigger" id="btnUnduhWord" style="background-color: #1d4ed8; box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.2);" disabled>
+          <i class="fa-solid fa-file-word"></i> Unduh Laporan (Word Landscape)
+        </button>
+      </div>
+      
+      <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; background: #fff;">
+        <table id="tabelRiwayat" style="width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px;">
+          <thead>
+            <tr style="background-color: #f1f5f9; border-bottom: 2px solid var(--border-color); text-align: left;">
+              <th style="padding: 10px;">Tanggal</th>
+              <th style="padding: 10px;">Kelas</th>
+              <th style="padding: 10px;">Pertemuan</th>
+              <th style="padding: 10px;">Materi Pokok</th>
+              <th style="padding: 10px;">Kehadiran</th>
+            </tr>
+          </thead>
+          <tbody id="bodyRiwayat">
+            <tr>
+              <td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Silakan pilih nama guru untuk melihat riwayat data.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- POPUP MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-list-check"></i> Elemen Pembelajaran</h2>
+        <button type="button" class="btn-close-modal" id="btnClosePopup">&times;</button>
+      </div>
+      
+      <div class="form-group">
+        <label for="pertemuanke">Pertemuan Ke-</label>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="pertemuanke" placeholder="Contoh: 1">
+      </div>
+      <div class="form-group">
+        <label for="materiPokok">Materi Pokok</label>
+        <input type="text" id="materiPokok" placeholder="Masukkan materi pokok">
+      </div>
+      <div class="form-group">
+        <label for="tujuanPembelajaran">Tujuan Pembelajaran</label>
+        <textarea id="tujuanPembelajaran" placeholder="Masukkan tujuan pembelajaran"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="metodePembelajaran">Metode Pembelajaran</label>
+        <input type="text" id="metodePembelajaran" placeholder="Contoh: Diskusi kelompok, Ceramah">
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn-save-modal" id="btnSavePopup">Simpan Detail</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastNotification"></div>
+
+    <script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwBxUnGkTsljjmJe1rM80Joq3--uvaLtAoYXr_AOtWjxBXysY1cbLTmNiFEW3jXrfocpA/exec";
+    
+    const modalOverlay = document.getElementById('modalOverlay');
+    const previewBox = document.getElementById('previewBox');
+    const jurnalForm = document.getElementById('jurnalForm');
+    let cacheDbGuru = [];
+
+    // Kendali Buka/Tutup Jendela Pop-up
+    document.getElementById('btnOpenPopup').addEventListener('click', () => modalOverlay.classList.add('active'));
+    document.getElementById('btnClosePopup').addEventListener('click', () => modalOverlay.classList.remove('active'));
+
+    // Memindahkan isian modal ke kotak Pratinjau (Preview) harian
+    document.getElementById('btnSavePopup').addEventListener('click', () => {
+      document.getElementById('p_pertemuan').textContent = document.getElementById('pertemuanke').value || '-';
+      document.getElementById('p_materi').textContent = document.getElementById('materiPokok').value || '-';
+      document.getElementById('p_tujuan').textContent = document.getElementById('tujuanPembelajaran').value || '-';
+      document.getElementById('p_metode').textContent = document.getElementById('metodePembelajaran').value || '-';
+      
+      previewBox.style.display = 'block';
+      modalOverlay.classList.remove('active');
+      showToast('Detail pertemuan disimpan.');
+    });
+
+    // Mesin Injeksi JSONP Dinamis Penerobos Blokir CORS Browser
+    function fetchJSONP(url, callbackName, successCallback) {
+      const script = document.createElement('script');
+      window[callbackName] = function(data) {
+        successCallback(data);
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+      script.src = `${url}&callback=${callbackName}`;
+      document.body.appendChild(script);
+    }
+
+    // 1. Memuat Daftar Nama Guru secara otomatis saat halaman pertama kali dibuka
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchJSONP(`${WEB_APP_URL}?action=getDropdownData`, 'handleDropdown', function(data) {
+        if (data.status === 'error') {
+          showToast('Gagal memuat: ' + data.message);
+          return;
+        }
+        populateSelect(document.getElementById('namaGuru'), data.guru);
+      });
+    });
+
+    // 2. Alur Penarikan Silabus Khusus ketika Nama Guru Terpilih
+    document.getElementById('namaGuru').addEventListener('change', function() {
+      const selectedGuru = this.value;
+      const elMapel = document.getElementById('mataPelajaran');
+      const elKelas = document.getElementById('kelas');
+
+      elMapel.innerHTML = '<option value="" disabled selected>Memuat data mapel...</option>';
+      elKelas.innerHTML = '<option value="" disabled selected>Memuat data kelas...</option>';
+      elMapel.disabled = elKelas.disabled = true;
+
+      fetchJSONP(`${WEB_APP_URL}?action=getDataByGuru&namaGuru=${encodeURIComponent(selectedGuru)}`, 'handleSilabus', function(data) {
+        if(data.status === "success" || data.status === "empty") {
+          cacheDbGuru = data.rawDb || [];
+          populateSelect(elMapel, data.mapel || []);
+          populateSelect(elKelas, data.kelas || []);
+          elMapel.disabled = elKelas.disabled = false;
+          showToast('Silabus guru berhasil dimuat.');
+          muatRiwayatJurnalSelesai(selectedGuru);
+        } else {
+          showToast('Gagal memuat silabus khusus.');
+        }
+      });
+    });
+
+    function populateSelect(el, items) {
+      el.innerHTML = '<option value="" disabled selected>-- Pilih --</option>';
+      items.forEach(item => {
+        if(item) {
+          let opt = document.createElement('option');
+          opt.value = opt.textContent = item;
+          el.appendChild(opt);
+        }
+      });
+    }
+
+    // 3. Validasi Keamanan dan Pengiriman Data Jurnal (Submit Form)
+    jurnalForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const pertemuanNum = document.getElementById('pertemuanke').value;
+      if(!pertemuanNum) {
+        showToast('Silakan isi "Detail Pertemuan" terlebih dahulu!');
+        modalOverlay.classList.add('active');
+        return;
+      }
+
+      const btnSubmit = document.getElementById('btnSubmit');
+      const btnText = document.getElementById('btnText');
+      
+      // Mengunci tombol agar tidak memicu pengiriman ganda (Double-Submit Protection)
+      btnSubmit.disabled = true;
+      btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim data...';
+
+      // Penggabungan parameter kehadiran: H:x, S:x, I:x, A:x
+      const rekapAbsen = `H:${document.getElementById('absHadir').value}, S:${document.getElementById('absSakit').value}, I:${document.getElementById('absIzin').value}, A:${document.getElementById('absAlfa').value}`;
+      const tglHariIni = new Date().toISOString().substring(0, 10);
+
+      const params = new URLSearchParams();
+      params.append('action', 'insertDataTerpadu'); // Parameter sinkron dengan backend kode.gs
+      params.append('tanggal', tglHariIni);
+      params.append('namaGuru', document.getElementById('namaGuru').value);
+      params.append('mapel', document.getElementById('mataPelajaran').value);
+      params.append('kelas', document.getElementById('kelas').value);
+      params.append('pertemuan', pertemuanNum);
+      params.append('materi', document.getElementById('materiPokok').value || '-');
+      params.append('tujuan', document.getElementById('tujuanPembelajaran').value || '-');
+      params.append('metode', document.getElementById('metodePembelajaran').value || '-');
+      params.append('kehadiran', rekapAbsen);
+      params.append('catatan', document.getElementById('catatanRefleksi').value);
+      params.append('status', 'Selesai');
+
+      fetchJSONP(`${WEB_APP_URL}?${params.toString()}`, 'handleInsert', function(result) {
+        btnSubmit.disabled = false;
+        btnText.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Jurnal Harian';
+        
+        if(result.status === "success") {
+          showToast('Jurnal sukses dikirim ke Sheet guru!');
+          
+          // Pembersihan kotak isian secara aman dan menyeluruh
+          document.getElementById('catatanRefleksi').value = '';
+          document.getElementById('pertemuanke').value = '';
+          document.getElementById('materiPokok').value = '';
+          document.getElementById('tujuanPembelajaran').value = '';
+          document.getElementById('metodePembelajaran').value = '';
+          
+          document.getElementById('absHadir').value = '0';
+          document.getElementById('absSakit').value = '0';
+          document.getElementById('absIzin').value = '0';
+          document.getElementById('absAlfa').value = '0';
+          
+          previewBox.style.display = 'none';
+        } else {
+          showToast('Gagal menyimpan: ' + (result.message || 'Terjadi kesalahan sistem.'));
+        }
+      });
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3500);
+    }
+    
+// 4. Fungsi Tambahan: Memuat Riwayat Jurnal Selesai ke Tabel
+    function muatRiwayatJurnalSelesai(namaGuru) {
+      const bodyRiwayat = document.getElementById('bodyRiwayat');
+      const btnUnduhWord = document.getElementById('btnUnduhWord');
+      
+      bodyRiwayat.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);"><i class="fa-solid fa-spinner fa-spin"></i> Memuat riwayat jurnal...</td></tr>';
+      
+      // Mengambil data riwayat dari Google Apps Script (pastikan backend kode.gs mendukung action ini)
+      fetchJSONP(`${WEB_APP_URL}?action=getRiwayatJurnal&namaGuru=${encodeURIComponent(namaGuru)}`, 'handleRiwayat', function(data) {
+        if (data.status === 'success' && data.riwayat && data.riwayat.length > 0) {
+          bodyRiwayat.innerHTML = ''; // Bersihkan loader
+          
+          data.riwayat.forEach(row => {
+            let tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--border-color)';
+            
+            // Format tampilan Tanggal jika diperlukan (misal format ISO ke lokal)
+            let tglTampil = row.tanggal ? row.tanggal.substring(0, 10) : '-';
+            
+            tr.innerHTML = `
+              <td style="padding: 10px;">${tglTampil}</td>
+              <td style="padding: 10px;">${row.kelas || '-'}</td>
+              <td style="padding: 10px; text-align: center;">${row.pertemuan || '-'}</td>
+              <td style="padding: 10px;">${row.materi || '-'}</td>
+              <td style="padding: 10px; font-size: 11px;">${row.kehadiran || '-'}</td>
+            `;
+            bodyRiwayat.appendChild(tr);
+          });
+          
+          // Aktifkan tombol unduh jika data riwayat tersedia
+          btnUnduhWord.disabled = false;
+          
+        } else {
+          bodyRiwayat.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">Belum ada riwayat jurnal yang selesai untuk guru ini.</td></tr>';
+          btnUnduhWord.disabled = true;
+        }
+      });
+    }
+
+    
+  </script>
+</body>
+</html>
