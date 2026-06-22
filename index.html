@@ -38,82 +38,29 @@
     .preview-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: left; font-size: 13px; }
     .preview-box h4 { color: #166534; margin-bottom: 5px; }
     .btn-submit { width: 100%; background-color: var(--primary-color); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
+    
+    /* REVISI CSS MODAL OVERLAY: Ditambahkan display: none agar tidak memblokir ketukan di HP */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s; }
+    .modal-overlay.active { display: flex; opacity: 1; visibility: visible; }
+    
     .modal-content { background: #ffffff; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; border-radius: 16px; padding: 25px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
     .btn-close-modal { background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
     .modal-footer { margin-top: 20px; display: flex; justify-content: flex-end; }
     .btn-save-modal { background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
     @media (max-width: 480px) { .container { padding: 15px; } .row { grid-template-columns: 1fr; gap: 10px; } .grid-absensi { gap: 5px; } }
-        /* --- ATURAN KHUSUS SAAT DICETAK KELUAR PDF --- */
-    /* --- ATURAN CETAK PDF: REVISI MENTOK ATAS --- */
+    
     @media print {
-        table, th, td {
-        font-family: 'Courier Prime', monospace !important; /* Paksa tabel pakai font bank */
-        border: 1px solid #000 !important;
-        padding: 6px 8px !important;
-        font-size: 11px !important;
-        text-transform: uppercase; /* Membuat teks tabel otomatis kapital khas manifes bank */
-      }
-      @page {
-        size: A4;
-        margin: 0.2in 0.4in; /* Memperkecil margin atas agar mentok ke ujung kertas */
-      }
-      
-      /* Mematikan fungsi pengetengahan layar (flexbox) saat dicetak */
-      html, body {
-        background: #fff !important;
-        color: #000 !important;
-        display: block !important;    /* Menghilangkan flexbox penengah */
-        min-height: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-      }
-      
-      /* Sembunyikan seluruh komponen form & tombol agar tidak mengotori kertas */
-      header, form, .modal-overlay, .btn-trigger, h3 {
-        display: none !important;
-      }
-      
-      /* Paksa container utama agar melebar penuh secara instan dari atas */
-      .container {
-        box-shadow: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        max-width: 100% !important;
-        display: block !important;
-      }
-      
-      .interactive-section {
-        border: none !important;
-        background: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        display: block !important;
-      }
-      
-      /* Pengaturan tabel ringkas dan tegas */
-      table {
-        width: 100% !important;
-        margin-top: 5px !important;
-        border-collapse: collapse !important;
-      }
-      
-      th, td {
-        border: 1px solid #000 !important;
-        padding: 5px 8px !important;
-        font-size: 11px !important;
-        color: #000 !important;
-      }
-      
-      th {
-        background-color: #f1f5f9 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
+      table, th, td { font-family: 'Courier Prime', monospace !important; border: 1px solid #000 !important; padding: 6px 8px !important; font-size: 11px !important; text-transform: uppercase; }
+      @page { size: A4; margin: 0.2in 0.4in; }
+      html, body { background: #fff !important; color: #000 !important; display: block !important; min-height: auto !important; padding: 0 !important; margin: 0 !important; }
+      header, form, .modal-overlay, .btn-trigger, h3 { display: none !important; }
+      .container { box-shadow: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; display: block !important; }
+      .interactive-section { border: none !important; background: none !important; padding: 0 !important; margin: 0 !important; display: block !important; }
+      table { width: 100% !important; margin-top: 5px !important; border-collapse: collapse !important; }
+      th, td { border: 1px solid #000 !important; padding: 5px 8px !important; font-size: 11px !important; color: #000 !important; }
+      th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
-  
   </style>
 </head>
 <body>
@@ -256,32 +203,37 @@
       modalOverlay.classList.remove('active');
     });
 
-    function fetchJSONP(url, callbackName, successCallback) {
-      var script = document.createElement('script');
-      window[callbackName] = function(data) {
-        successCallback(data);
-        document.body.removeChild(script);
-        delete window[callbackName];
-      };
-      script.src = url + "&callback=" + callbackName;
-      document.body.appendChild(script);
-    }
-
+    // REVISI METODE AMBIL DATA: Menggunakan Fetch API asli bawaan smartphone modern
     window.addEventListener('DOMContentLoaded', function() {
-      fetchJSONP(WEB_APP_URL + "?action=getDropdownData", 'handleDropdown', function(data) {
-        if(data.guru) populateSelect(document.getElementById('namaGuru'), data.guru);
-      });
+      var selectGuru = document.getElementById('namaGuru');
+      fetch(WEB_APP_URL + "?action=getDropdownData")
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if(data && data.guru) populateSelect(selectGuru, data.guru);
+        })
+        .catch(function(err) {
+          console.error("Gagal memuat:", err);
+          selectGuru.innerHTML = '<option value="">Gagal memuat data</option>';
+        });
     });
 
     document.getElementById('namaGuru').addEventListener('change', function() {
       var g = this.value;
-      fetchJSONP(WEB_APP_URL + "?action=getDataByGuru&namaGuru=" + encodeURIComponent(g), 'handleSilabus', function(data) {
-        populateSelect(document.getElementById('mataPelajaran'), data.mapel || []);
-        populateSelect(document.getElementById('kelas'), data.kelas || []);
-        document.getElementById('mataPelajaran').disabled = false;
-        document.getElementById('kelas').disabled = false;
-        muatRiwayatJurnalSelesai(g);
-      });
+      var selectMapel = document.getElementById('mataPelajaran');
+      var selectKelas = document.getElementById('kelas');
+      
+      selectMapel.innerHTML = '<option value="">Memuat...</option>';
+      selectKelas.innerHTML = '<option value="">Memuat...</option>';
+
+      fetch(WEB_APP_URL + "?action=getDataByGuru&namaGuru=" + encodeURIComponent(g))
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          populateSelect(selectMapel, data.mapel || []);
+          populateSelect(selectKelas, data.kelas || []);
+          selectMapel.disabled = false;
+          selectKelas.disabled = false;
+          muatRiwayatJurnalSelesai(g);
+        });
     });
 
     function populateSelect(el, items) {
@@ -314,31 +266,36 @@
       prms.push("catatan=" + encodeURIComponent(document.getElementById('catatanRefleksi').value));
       prms.push("status=Selesai");
 
-      fetchJSONP(WEB_APP_URL + "?" + prms.join("&"), 'handleInsert', function(res) {
-        if(res.status==='success'){ alert('Sukses dikirim!'); location.reload(); }
-      });
+      fetch(WEB_APP_URL + "?" + prms.join("&"))
+        .then(function(res) { return res.json(); })
+        .then(function(res) {
+          if(res.status==='success'){ alert('Sukses dikirim!'); location.reload(); }
+        });
     });
 
     function muatRiwayatJurnalSelesai(nama) {
       var b = document.getElementById('bodyRiwayat');
       b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Memuat...</td></tr>';
-      fetchJSONP(WEB_APP_URL + "?action=getRiwayatJurnal&namaGuru=" + encodeURIComponent(nama), 'handleRiwayat', function(d) {
-        if(d.riwayat && d.riwayat.length > 0) {
-          b.innerHTML = '';
-          d.riwayat.forEach(function(r) {
-            var tr = document.createElement('tr');
-            tr.innerHTML = '<td>'+r.tanggal+'</td><td>'+r.kelas+'</td><td style="text-align:center;">'+r.pertemuan+'</td><td>'+r.materi+'</td><td>'+r.kehadiran+'</td>';
-            b.appendChild(tr);
-          });
-          document.getElementById('btnCetakPDF').disabled = false;
-        } else {
-          b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kosong</td></tr>';
-        }
-      });
+      
+      fetch(WEB_APP_URL + "?action=getRiwayatJurnal&namaGuru=" + encodeURIComponent(nama))
+        .then(function(res) { return res.json(); })
+        .then(function(d) {
+          if(d.riwayat && d.riwayat.length > 0) {
+            b.innerHTML = '';
+            d.riwayat.forEach(function(r) {
+              var tr = document.createElement('tr');
+              tr.innerHTML = '<td>'+r.tanggal+'</td><td>'+r.kelas+'</td><td style="text-align:center;">'+r.pertemuan+'</td><td>'+r.materi+'</td><td>'+r.kehadiran+'</td>';
+              b.appendChild(tr);
+            });
+            document.getElementById('btnCetakPDF').disabled = false;
+          } else {
+            b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kosong</td></tr>';
+          }
+        });
     }
 
     // =================================================================
-    // LOGIKA TANDA TANGAN SENTUH JARI & LANGSUNG OTOMATIS UNDUH PDF
+    // REVISI LOGIKA TANDA TANGAN SENTUH JARI (SENSITIF HANYA DI CANVAS)
     // =================================================================
     var canvas = document.getElementById('canvasTTD');
     var ctx = canvas.getContext('2d');
@@ -353,6 +310,7 @@
     }
 
     function startDrawing(e) {
+      if (e.target !== canvas) return; // Mencegah pemblokiran di luar canvas
       drawing = true;
       var pos = getMousePos(e);
       ctx.beginPath();
@@ -361,7 +319,7 @@
     }
 
     function draw(e) {
-      if (!drawing) return;
+      if (!drawing || e.target !== canvas) return; // Mencegah pemblokiran di luar canvas
       var pos = getMousePos(e);
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
@@ -375,15 +333,14 @@
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('touchstart', startDrawing);
-    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchstart', startDrawing, { passive: false });
+    canvas.addEventListener('touchmove', draw, { passive: false });
     canvas.addEventListener('touchend', stopDrawing);
 
     document.getElementById('btnHapusCanvas').addEventListener('click', function() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    // 1. Ketika tombol "Cetak Laporan (PDF)" diklik, hanya memunculkan kotak tanda tangan
     document.getElementById('btnCetakPDF').addEventListener('click', function() {
       var namaGuruTerpilih = document.getElementById('namaGuru').value;
       if (!namaGuruTerpilih || namaGuruTerpilih === "") {
@@ -398,7 +355,6 @@
       document.getElementById('modalTTDOverlay').classList.remove('active');
     });
 
-    // 2. ALUR OTOMATIS: Klik "Gunakan TTD" -> Minta NIP -> Langsung Download PDF
     document.getElementById('btnSelesaiTTD').addEventListener('click', function() {
       var namaGuruTerpilih = document.getElementById('namaGuru').value;
       var mapelTerpilih = document.getElementById('mataPelajaran').value;
@@ -413,7 +369,6 @@
       var infoWaktu = new Date();
       var tanggalLengkap = infoWaktu.getDate() + " " + daftarBulan[infoWaktu.getMonth()] + " " + infoWaktu.getFullYear();
 
-      // Struktur KOP Atas Dinamis
       var printHeader = document.createElement('div');
       printHeader.id = 'dynamicPrintHeader';
       printHeader.innerHTML = 
@@ -429,7 +384,6 @@
           '<tr style="border: none !important;"><td style="padding: 2px 0; border: none !important;"><strong>MATA PELAJARAN</strong></td><td style="padding: 2px 0; border: none !important;">:</td><td style="padding: 2px 0; border: none !important; text-transform: uppercase;">' + (mapelTerpilih || '-') + '</td></tr>' +
         '</table>';
 
-      // Struktur Tanda Tangan 2 Kolom Dinamis
       var printFooter = document.createElement('div');
       printFooter.id = 'dynamicPrintFooter';
       printFooter.innerHTML = 
@@ -454,7 +408,6 @@
       areaTabel.insertBefore(printHeader, komponenTabel);
       areaTabel.insertBefore(printFooter, komponenTabel.nextSibling);
 
-      // Jendela download PDF langsung dipicu otomatis di sini
       setTimeout(function() {
         window.print();
         printHeader.remove();
