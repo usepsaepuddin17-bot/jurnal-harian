@@ -475,6 +475,7 @@
       }, 50); // Jeda aman 50ms agar browser HP punya waktu bernapas
     }
     // 1. Memuat Daftar Nama Guru secara otomatis saat halaman pertama kali dibuka
+        // Pastikan baris ini juga menggunakan simbol backtick ( ` ) bukan kutip biasa
     window.addEventListener('DOMContentLoaded', () => {
       fetchJSONP(`${WEB_APP_URL}?action=getDropdownData`, 'handleDropdown', function(data) {
         if (data.status === 'error') {
@@ -484,6 +485,7 @@
         populateSelect(document.getElementById('namaGuru'), data.guru);
       });
     });
+
 
     // 2. Alur Penarikan Silabus Khusus ketika Nama Guru Terpilih
     document.getElementById('namaGuru').addEventListener('change', function() {
