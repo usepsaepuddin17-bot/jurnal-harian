@@ -203,18 +203,30 @@
       modalOverlay.classList.remove('active');
     });
 
-    // REVISI METODE AMBIL DATA: Menggunakan Fetch API asli bawaan smartphone modern
+    // =================================================================
+    // KITA KEMBALIKAN FUNGSI JSONP KARENA APPS SCRIPT ANDA MEMINTANYA
+    // =================================================================
+    function fetchJSONP(url, callbackName, successCallback) {
+      var script = document.createElement('script');
+      window[callbackName] = function(data) {
+        successCallback(data);
+        document.body.removeChild(script);
+        delete window[callbackName];
+      };
+      script.src = url + "&callback=" + callbackName;
+      document.body.appendChild(script);
+    }
+
+    // Ambil data dropdown mula-mula dengan JSONP kembali
     window.addEventListener('DOMContentLoaded', function() {
       var selectGuru = document.getElementById('namaGuru');
-      fetch(WEB_APP_URL + "?action=getDropdownData")
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if(data && data.guru) populateSelect(selectGuru, data.guru);
-        })
-        .catch(function(err) {
-          console.error("Gagal memuat:", err);
+      fetchJSONP(WEB_APP_URL + "?action=getDropdownData", 'handleDropdown', function(data) {
+        if(data && data.guru) {
+          populateSelect(selectGuru, data.guru);
+        } else {
           selectGuru.innerHTML = '<option value="">Gagal memuat data</option>';
-        });
+        }
+      });
     });
 
     document.getElementById('namaGuru').addEventListener('change', function() {
@@ -225,15 +237,13 @@
       selectMapel.innerHTML = '<option value="">Memuat...</option>';
       selectKelas.innerHTML = '<option value="">Memuat...</option>';
 
-      fetch(WEB_APP_URL + "?action=getDataByGuru&namaGuru=" + encodeURIComponent(g))
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          populateSelect(selectMapel, data.mapel || []);
-          populateSelect(selectKelas, data.kelas || []);
-          selectMapel.disabled = false;
-          selectKelas.disabled = false;
-          muatRiwayatJurnalSelesai(g);
-        });
+      fetchJSONP(WEB_APP_URL + "?action=getDataByGuru&namaGuru=" + encodeURIComponent(g), 'handleSilabus', function(data) {
+        populateSelect(selectMapel, data.mapel || []);
+        populateSelect(selectKelas, data.kelas || []);
+        selectMapel.disabled = false;
+        selectKelas.disabled = false;
+        muatRiwayatJurnalSelesai(g);
+      });
     });
 
     function populateSelect(el, items) {
@@ -266,36 +276,32 @@
       prms.push("catatan=" + encodeURIComponent(document.getElementById('catatanRefleksi').value));
       prms.push("status=Selesai");
 
-      fetch(WEB_APP_URL + "?" + prms.join("&"))
-        .then(function(res) { return res.json(); })
-        .then(function(res) {
-          if(res.status==='success'){ alert('Sukses dikirim!'); location.reload(); }
-        });
+      fetchJSONP(WEB_APP_URL + "?" + prms.join("&"), 'handleInsert', function(res) {
+        if(res.status==='success'){ alert('Sukses dikirim!'); location.reload(); }
+      });
     });
 
     function muatRiwayatJurnalSelesai(nama) {
       var b = document.getElementById('bodyRiwayat');
       b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Memuat...</td></tr>';
       
-      fetch(WEB_APP_URL + "?action=getRiwayatJurnal&namaGuru=" + encodeURIComponent(nama))
-        .then(function(res) { return res.json(); })
-        .then(function(d) {
-          if(d.riwayat && d.riwayat.length > 0) {
-            b.innerHTML = '';
-            d.riwayat.forEach(function(r) {
-              var tr = document.createElement('tr');
-              tr.innerHTML = '<td>'+r.tanggal+'</td><td>'+r.kelas+'</td><td style="text-align:center;">'+r.pertemuan+'</td><td>'+r.materi+'</td><td>'+r.kehadiran+'</td>';
-              b.appendChild(tr);
-            });
-            document.getElementById('btnCetakPDF').disabled = false;
-          } else {
-            b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kosong</td></tr>';
-          }
-        });
+      fetchJSONP(WEB_APP_URL + "?action=getRiwayatJurnal&namaGuru=" + encodeURIComponent(nama), 'handleRiwayat', function(d) {
+        if(d.riwayat && d.riwayat.length > 0) {
+          b.innerHTML = '';
+          d.riwayat.forEach(function(r) {
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>'+r.tanggal+'</td><td>'+r.kelas+'</td><td style="text-align:center;">'+r.pertemuan+'</td><td>'+r.materi+'</td><td>'+r.kehadiran+'</td>';
+            b.appendChild(tr);
+          });
+          document.getElementById('btnCetakPDF').disabled = false;
+        } else {
+          b.innerHTML = '<tr><td colspan="5" style="text-align:center;">Kosong</td></tr>';
+        }
+      });
     }
 
     // =================================================================
-    // REVISI LOGIKA TANDA TANGAN SENTUH JARI (SENSITIF HANYA DI CANVAS)
+    // PENGAMANAN SENSOR KANVAS TTD AGAR TIDAK MENGUNCI LAYAR HP
     // =================================================================
     var canvas = document.getElementById('canvasTTD');
     var ctx = canvas.getContext('2d');
@@ -310,7 +316,7 @@
     }
 
     function startDrawing(e) {
-      if (e.target !== canvas) return; // Mencegah pemblokiran di luar canvas
+      if (e.target !== canvas) return; // Hanya jalankan preventDefault jika JARI menyentuh kotak canvas saja
       drawing = true;
       var pos = getMousePos(e);
       ctx.beginPath();
@@ -319,7 +325,7 @@
     }
 
     function draw(e) {
-      if (!drawing || e.target !== canvas) return; // Mencegah pemblokiran di luar canvas
+      if (!drawing || e.target !== canvas) return; 
       var pos = getMousePos(e);
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
