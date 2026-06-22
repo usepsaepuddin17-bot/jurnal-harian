@@ -188,8 +188,18 @@
         let canvas, ctx, isDrawing = false;
         let nipGuruTerinput = "";
 
+        // Fungsi pembentuk tanggal format YYYY-MM-DD sesuai zona waktu lokal perangkat Anda
+        function dapatkanTanggalLokal() {
+            const lokal = new Date();
+            const tahun = lokal.getFullYear();
+            const bulan = String(lokal.getMonth() + 1).padStart(2, '0');
+            const tgl = String(lokal.getDate()).padStart(2, '0');
+            return `${tahun}-${bulan}-${tgl}`;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
+            // Menggunakan tanggal lokal perangkat murni (Akurat WIB / WITA / WIT)
+            document.getElementById('tanggal').value = dapatkanTanggalLokal();
             ambilDataDropdown();
             initCanvasTtd();
         });
@@ -320,11 +330,11 @@
             .then(res => res.json())
             .then(res => {
                 if (res.status === "SUCCESS") {
-                    showToast(res.message, 'success');
-                    document.getElementById('jurnalForm').reset();
-                    document.getElementById('tanggal').value = new Date().toISOString().split('T')[0];
-                    loadRiwayatOtomatis(); 
-                }
+                showToast(res.message, 'success');
+                document.getElementById('jurnalForm').reset();
+                document.getElementById('tanggal').value = dapatkanTanggalLokal(); // <--- Diganti ke fungsi lokal baru
+                loadRiwayatOtomatis(); 
+            }
                 btn.textContent = 'SIMPAN JURNAL'; btn.disabled = false;
             }).catch((err) => { 
                 console.error(err);
