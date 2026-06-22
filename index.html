@@ -360,50 +360,91 @@
         }
 
         /* INISIALISASI CANVAS UNTUK GOAL TTD DIGITAL */
-        function initCanvasTtd() {
-            canvas = document.getElementById('signaturePad');
-            ctx = canvas.getContext('2d');
-            
-            function getMousePos(e) {
-                let rect = canvas.getBoundingClientRect();
-                return {
-                    x: (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - rect.left,
-                    y: (e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) - rect.top
-                };
-            }
-            function startDrawing(e) { 
-                isDrawing = true; 
-                let pos = getMousePos(e); 
-                ctx.beginPath(); 
-                ctx.moveTo(pos.x, pos.y); 
-                if(e.cancelable) e.preventDefault(); 
-            }
-            function draw(e) { 
-                if(!isDrawing) return; 
-                let pos = getMousePos(e); 
-                ctx.lineTo(pos.x, pos.y); 
-                ctx.stroke(); 
-                if(e.cancelable) e.preventDefault(); 
-            }
-            function stopDrawing() { isDrawing = false; }
+        /* INISIALISASI CANVAS UNTUK GOAL TTD DIGITAL (OPTIMAL UNTUK HP & DESKTOP) */
+function initCanvasTtd() {
+    canvas = document.getElementById('signaturePad');
+    ctx = canvas.getContext('2d');
+    
+    // Fungsi presisi menangkap koordinat baik Mouse maupun Touchscreen HP
+    function getEventPos(e) {
+        let rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+        
+        // Cek apakah ini event sentuhan HP atau klik mouse
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        // Menghitung posisi murni koordinat pada element canvas
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
 
-            canvas.addEventListener('mousedown', startDrawing); 
-            canvas.addEventListener('mousemove', draw); 
-            window.addEventListener('mouseup', stopDrawing);
-            
-            canvas.addEventListener('touchstart', startDrawing, {passive: false}); 
-            canvas.addEventListener('touchmove', draw, {passive: false}); 
-            window.addEventListener('touchend', stopDrawing);
-            
-            ctx.strokeStyle = "#000000"; ctx.lineWidth = 2;
-        }
-        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-        function resizeCanvas() { 
-            canvas.width = canvas.offsetWidth; 
-            canvas.height = canvas.offsetHeight; 
-            ctx.strokeStyle = "#000000"; 
-            ctx.lineWidth = 2; 
-        }
+    function startDrawing(e) { 
+        isDrawing = true; 
+        let pos = getEventPos(e); 
+        ctx.beginPath(); 
+        ctx.moveTo(pos.x, pos.y); 
+        
+        // Mencegah layar HP ikut tergulung/scroll saat menggores TTD
+        if(e.cancelable) e.preventDefault(); 
+    }
+
+    function draw(e) { 
+        if(!isDrawing) return; 
+        let pos = getEventPos(e); 
+        ctx.lineTo(pos.x, pos.y); 
+        ctx.stroke(); 
+        
+        if(e.cancelable) e.preventDefault(); 
+    }
+
+    function stopDrawing() { isDrawing = false; }
+
+    // Event Listener khusus Desktop / Mouse
+    canvas.addEventListener('mousedown', startDrawing); 
+    canvas.addEventListener('mousemove', draw); 
+    window.addEventListener('mouseup', stopDrawing);
+    
+    // Event Listener khusus HP / Touchscreen (Menggunakan opsi passive: false agar preventDefault bekerja)
+    canvas.addEventListener('touchstart', startDrawing, { passive: false }); 
+    canvas.addEventListener('touchmove', draw, { passive: false }); 
+    window.addEventListener('touchend', stopDrawing);
+    
+    // Gaya goresan pena TTD agar lebih mulus
+    ctx.strokeStyle = "#000000"; 
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round"; // Membuat ujung garis melingkar mulus
+    ctx.lineJoin = "round"; // Membuat belokan garis tidak patah-patah
+}
+
+// Mengatur ulang ukuran canvas agar mengikuti resolusi rasio layar HP
+function resizeCanvas() { 
+    const ratio = window.devicePixelRatio || 1;
+    
+    // Simpan dulu ukuran asli element css
+    const widthAsli = canvas.offsetWidth;
+    const heightAsli = canvas.offsetHeight;
+    
+    // Kalibrasi resolusi internal canvas berdasarkan kerapatan pixel layar HP
+    canvas.width = widthAsli * ratio;
+    canvas.height = heightAsli * ratio;
+    
+    // Kembalikan skala konteks gambar agar ukurannya pas di layar
+    ctx.scale(ratio, ratio);
+    
+    // Setel ulang properti kuas penanda setelah canvas di-resize
+    ctx.strokeStyle = "#000000"; 
+    ctx.lineWidth = 2.5; 
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+}
 
         // ✅ PROSES GENERATE FILE PDF SESUAI PERSIS LAYOUT DOKUMEN image_8e829f.png
         function prosesUnduhFinal() {
