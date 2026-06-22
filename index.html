@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jurnal Harian Guru - SMAN 15 Maluku Tengah</title>
-  <link href="https://googleapis.com" rel="stylesheet">
-  <link rel="stylesheet" href="https://cloudflare.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <style>
     :root {
       --primary-color: #4f46e5;
@@ -454,18 +455,25 @@
       showToast('Detail pertemuan disimpan.');
     });
 
-    // Mesin Injeksi JSONP Dinamis Penerobos Blokir CORS Browser
+    // Mesin JSONP yang dioptimasi agar lebih ringan di HP (Mencegah Freeze)
     function fetchJSONP(url, callbackName, successCallback) {
-      const script = document.createElement('script');
-      window[callbackName] = function(data) {
-        successCallback(data);
-        document.body.removeChild(script);
-        delete window[callbackName];
-      };
-      script.src = `${url}&callback=${callbackName}`;
-      document.body.appendChild(script);
+      setTimeout(() => {
+        const script = document.createElement('script');
+        script.async = true; // Membuatnya berjalan di latar belakang (background)
+        
+        window[callbackName] = function(data) {
+          successCallback(data);
+          // Beri jeda sedikit sebelum menghapus script agar HP tidak lag
+          setTimeout(() => {
+            if(script.parentNode) document.body.removeChild(script);
+            delete window[callbackName];
+          }, 100);
+        };
+        
+        script.src = `${url}&callback=${callbackName}`;
+        document.body.appendChild(script);
+      }, 50); // Jeda aman 50ms agar browser HP punya waktu bernapas
     }
-
     // 1. Memuat Daftar Nama Guru secara otomatis saat halaman pertama kali dibuka
     window.addEventListener('DOMContentLoaded', () => {
       fetchJSONP(`${WEB_APP_URL}?action=getDropdownData`, 'handleDropdown', function(data) {
