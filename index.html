@@ -206,13 +206,23 @@
     // =================================================================
     // KITA KEMBALIKAN FUNGSI JSONP KARENA APPS SCRIPT ANDA MEMINTANYA
     // =================================================================
-    function fetchJSONP(url, callbackName, successCallback) {
+   function fetchJSONP(url, callbackName, successCallback) {
       var script = document.createElement('script');
+      
+      // 1. Penangkap Utama (sesuai nama yang diminta di HTML)
       window[callbackName] = function(data) {
         successCallback(data);
-        document.body.removeChild(script);
+        if (script.parentNode) document.body.removeChild(script);
         delete window[callbackName];
       };
+      
+      // 2. Penangkap Cadangan Otomatis (Jika Google Apps Script Anda memaksa memanggil 'callback_d')
+      window['callback_d'] = function(data) {
+        successCallback(data);
+        if (script.parentNode) document.body.removeChild(script);
+        delete window['callback_d'];
+      };
+
       script.src = url + "&callback=" + callbackName;
       document.body.appendChild(script);
     }
